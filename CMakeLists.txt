@@ -11,11 +11,11 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  genmsg
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(PCL 1.3 REQUIRED COMPONENTS common io)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -103,10 +103,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES radar_rig
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+##  INCLUDE_DIRS include
+##  LIBRARIES radar_rig
+##  CATKIN_DEPENDS roscpp rospy std_msgs pcl_ros pcl
+##  DEPENDS system_lib
 )
 
 ###########
@@ -130,7 +130,20 @@ include_directories(
 ## either from message generation or dynamic reconfigure
 # add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
+include_directories(${PCL_INCLUDE_DIRS})
+link_directories(${PCL_LIBRARY_DIRS})
+add_definitions(${PCL_DEFINITIONS})
+
 ## Declare a C++ executable
+add_executable(listener src/subscribe_ROR.cpp)
+target_link_libraries(listener ${catkin_LIBRARIES})
+add_dependencies(listener beginner_tutorials_generate_messages_cpp)
+
+add_executable(generate_pcl src/generate_pcl.cpp)
+target_link_libraries(generate_pcl ${catkin_LIBRARIES} ${PCL_LIBRARIES})
+add_dependencies(generate_pcl beginner_tutorials_generate_messages_cpp)
+
+
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/radar_rig_node.cpp)

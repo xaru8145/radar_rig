@@ -1,0 +1,13 @@
+<launch>
+
+  <node pkg="radar_rig" type="listener" name="listener"/>
+  <node pkg="nodelet" type="nodelet" name="rzi_ROR_filt_mapping" args="standalone pcl/RadiusOutlierRemoval" output="screen">
+    <remap from="~input" to="rzi_filt_out"/> <!--  cloud_pcl    rzi_filt_out   -->
+    <remap from="~output" to="rzi_ROR_filter_out"/>
+    <!-- best_range_res param values -->
+
+    <param name="min_neighbors" value="150"/>
+    <param name="radius_search" value="140"/>
+
+  </node>
+</launch>

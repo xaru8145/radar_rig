@@ -8,10 +8,10 @@
   <arg name="eval" default="false" doc="launch radar_mapping_eval.launch with multiple octomap servers"/>
 
   <arg name="goggles" default="false"/>
-  <arg name="radar"   default="true"/>
-  <arg name="camera"  default="true"/>
-  <arg name="lidar"   default="true"/>
-  <arg name="imu"     default="true"/>
+  <arg name="radar"   default="false"/>
+  <arg name="camera"  default="false"/>
+  <arg name="imu"  default="false"/>
+  <arg name="lidar"   default="false"/>
   <arg name="rviz"    default="true"/>
 
   <!-- Radar serial ports (for online mapping)-->
@@ -20,7 +20,7 @@
 
   <!-- Goggles parameters -->
   <arg name="launch_radar" default="false" doc="launch radar in addition to velocity estimator?"/>
-  <arg name="publish_inliers" default="true" doc="publish MLESAC inlier pointcloud?"/>
+  <arg name="publish_inliers" default="false" doc="publish MLESAC inlier pointcloud?"/>
   <arg name="radar_cfg" default="rngRes_0-04_velRes_0-15_rngMax_10-04_3d_10Hz" doc="1843 best range res"/>
   <!-- arg name="radar_cfg" default="rangeRes_0-12_velRes_0-04_velMax_2-56_3d_10Hz" doc="1843 best Doppler res"/ -->
 
@@ -33,7 +33,7 @@
       <arg name="lidar"  value="$(arg lidar)"/>
       <arg name="imu"    value="$(arg imu)"/>
       <arg name="tf"     value="false"/>
-      <arg name="rviz"   value="false"/>
+      <arg name="rviz"    default="true"/>
 
       <arg name="command_port" value="$(arg command_port)"/>
       <arg name="data_port" value="$(arg data_port)"/>
@@ -47,6 +47,12 @@
       <arg name="config" value="$(arg radar_cfg)"/>
     </include>
 
+    <!-- launch robot_localization -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_imu" args="0.0 0.0 0.0 0.0 0.0 0 1.0 base_link imu_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_radar" args="-0.527 0.0 0.0 0.0 0.0 0.0 base_link base_radar_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_map" args="0.0 0.0 0.0 0.0 0.0 0 1.0 map odom" />
+    <include file="$(find robot_localization)/launch/jackal_localization.launch"/>
+
     <!-- launch world2odom transform node (Octomap requires tf from odom to map frame) -->
     <!-- NOTE: this does NOT work. It effectively "doubles" the tf from camera_pose_frame to map -->
     <!-- <node pkg="radar_rig" type="world2odom_tf.py" name="vrpn_pose_tf" output="screen">
@@ -59,23 +65,29 @@
   <!-- NOTE: for "offline" mapping, sensor data and world2odom_tf are recorded topics -->
   <group if="$(arg offline)">
     <!-- launch Goggles node -->
+    <!--
     <include if="$(arg goggles)" file="$(find goggles)/launch/goggles.launch">
       <arg name="launch_radar" value="$(arg launch_radar)"/>
       <arg name="publish_inliers" value="$(arg publish_inliers)"/>
     </include>
-
+  -->
     <!-- launch robot_localization -->
-
-    <!-- launch additional radar_mapping node that uses radar odometry (not T265) -->
-
+    <!--
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_imu" args="0.0 0.0 0.0 0.0 0.0 0 1.0 base_link imu_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_radar" args="-0.527 0.0 0.0 0.0 0.0 0.0 base_link base_radar_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_map" args="0.0 0.0 0.0 0.0 0.0 0 1.0 map odom" />
+    <include file="$(find robot_localization)/launch/jackal_localization.launch"/>
+    -->
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_radar" args="-0.527 0.0 0.0 0.0 0.0 0.0 base_link base_radar_link" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="tf_map" args="0.0 0.0 0.0 0.0 0.0 0 1.0 map odom" />
   </group>
 
   <!-- static transfrom from camera_pose_frame to additional sensor frames -->
-  <node pkg="tf2_ros" type="static_transform_publisher" name="map_odom_tf" args="0 0 0 0 0 0 map camera_odom_frame"/>
+  <!--<node pkg="tf2_ros" type="static_transform_publisher" name="map_odom_tf" args="0 0 0 0 0 0 map camera_odom_frame"/>
   <node pkg="tf2_ros" type="static_transform_publisher" name="camera_radar_tf" args="0 0 -0.040 0 0 0 camera_pose_frame base_radar_link"/>
   <node if="$(arg lidar)" pkg="tf2_ros" type="static_transform_publisher" name="camera_lidar_tf" args="-0.110 0 0.040 0 0 0 camera_pose_frame laser"/>
   <node if="$(arg imu)" pkg="tf2_ros" type="static_transform_publisher" name="camera_imu_tf" args="-0.065 0 -0.010 0 0 0 camera_pose_frame 3dm_gx5_15"/>
-
+-->
   <!-- launch Octomap via radar_mapping.launch -->
   <include unless="$(arg eval)" file="$(find radar_rig)/launch/radar_mapping.launch">
      <arg name="pcl_limit_filter_topic" value="mmWaveDataHdl/RScan"/>
