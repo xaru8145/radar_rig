@@ -22,7 +22,7 @@
     <param if="$(arg rng_res)" name="radius_search" value="0.10"/>
     <!-- best_doppler_res param values -->
     <param unless="$(arg rng_res)" name="min_neighbors" value="4"/>
-    <param unless="$(arg rng_res)" name="radius_search" value="0.15"/>
+    <param unless="$(arg rng_res)" name="radius_search" value="5"/>
   </node>
 
   <!-- Create "filtered" 3D map from ROR filtered rzi passthrough-filtered pcl -->
